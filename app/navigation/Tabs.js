@@ -1,12 +1,5 @@
-import React, { Component } from "react";
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableHighlight,
-  View,
-} from "react-native";
+import React from "react";
+import { Image, StyleSheet, View } from "react-native";
 
 import Product from "../screens/Product";
 import Meal from "../screens/Meal";

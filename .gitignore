@@ -14,3 +14,4 @@ app/web-build/
 app/.DS_Store
 
 backend/config.py
+backend/__pycache__/
