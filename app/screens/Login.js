@@ -15,6 +15,7 @@ class Login extends Component {
       colegiado: "",
       pass: "",
     };
+    this.refrescar = React.createRef();
   }
 
   handleColegiado = (text) => {
@@ -26,7 +27,28 @@ class Login extends Component {
   };
 
   ingresar = () => {
-    //this.props.navigation
+    console.log({
+      colegiado: this.state.colegiado,
+      contrasena: this.state.pass,
+    });
+    fetch("http://18.222.41.113:7050/", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        colegiado: this.state.colegiado,
+        contrasena: this.state.pass,
+      }),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+        console.log(response.content);
+        console.log(response.originator.name);
+        this.refrescar.current.value = "";
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   render() {
@@ -44,8 +66,10 @@ class Login extends Component {
             style={styles.input}
             placeholder="No. Colegiado"
             maxLength={7}
-            onChangeText={this.handleColegiado}
+            onChangeText={(value) => this.setState({ colegiado: value })}
+            value={this.state.colegiado}
             keyboardType={"numeric"}
+            ref={this.refrescar}
           />
           <TextInput
             style={styles.input}
@@ -53,9 +77,11 @@ class Login extends Component {
             secureTextEntry={true}
             autoCapitalize={"none"}
             autoCorrect={false}
-            onChangeText={this.handlePassword}
+            onChangeText={(value) => this.setState({ pass: value })}
+            value={this.state.pass}
+            ref={this.refrescar}
           />
-          <TouchableHighlight>
+          <TouchableHighlight onPress={this.ingresar}>
             <View style={styles.botones}>
               <Text style={styles.txtBoton}>Ingresar</Text>
             </View>
@@ -64,7 +90,7 @@ class Login extends Component {
 
         <View style={styles.container2}>
           <Text>¿No estás registrado?</Text>
-          <TouchableHighlight onPress={this.ingresar}>
+          <TouchableHighlight>
             <View style={styles.botones}>
               <Text style={styles.txtBoton}>Crea una cuenta</Text>
             </View>
