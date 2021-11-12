@@ -71,7 +71,7 @@ export default function Tabs() {
         }}
       />
       <Tab.Screen
-        name="Inicio sesión"
+        name="Sesión"
         component={Login}
         options={{
           tabBarIcon: ({ focused }) => (
