@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
   Modal,
+  AsyncStorage,
 } from "react-native";
 
 import { Picker } from "@react-native-picker/picker";
@@ -52,7 +53,6 @@ class Login extends Component {
         text: "OK",
         onPress: () => {
           console.log("Bienvenida");
-          //enviar a otra pantalla
           this.enviarTexto();
         },
       },
@@ -203,6 +203,7 @@ class Login extends Component {
             console.log(response);
             if (response != undefined) {
               this.setState({ datos: response });
+              AsyncStorage.setItem("DATOS", JSON.stringify(this.state.datos));
               this.alertaPositivo();
             }
           })
@@ -386,7 +387,42 @@ class Login extends Component {
     } else {
       return (
         <View style={styles.container}>
-          <Text>Texto para sesion</Text>
+          <Image
+            source={require("../assets/icons/avatar.png")}
+            style={styles.image_circular}
+          />
+          <TextInput
+            style={styles.inputModal}
+            placeholder={`COLEGIADO :: ` + this.state.datos.colegiado}
+            placeholderTextColor="black"
+            editable={false}
+          />
+          <TextInput
+            style={styles.inputModal}
+            placeholder={`EDAD :: ` + this.state.datos.edad}
+            placeholderTextColor="black"
+            editable={false}
+          />
+          <TextInput
+            style={styles.inputModal}
+            placeholder={`NOMBRE :: ` + this.state.datos.nombre}
+            placeholderTextColor="black"
+            editable={false}
+          />
+          <TouchableOpacity
+            onPress={() => {
+              AsyncStorage.clear();
+              this.setState({ datos: undefined });
+            }}
+          >
+            <View style={styles.btn_icon}>
+              <Image
+                source={require("../assets/icons/logout.png")}
+                style={styles.image_icon}
+              />
+              <Text>Salir</Text>
+            </View>
+          </TouchableOpacity>
         </View>
       );
     }
@@ -417,6 +453,17 @@ const styles = StyleSheet.create({
     height: 200,
     width: 200,
     borderRadius: 81,
+  },
+  image_icon: {
+    height: 25,
+    width: 25,
+  },
+  btn_icon: {
+    backgroundColor: "#f19476",
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 91,
+    width: 85,
   },
   botones: {
     backgroundColor: "#FFC300",
