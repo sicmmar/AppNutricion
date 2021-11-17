@@ -79,5 +79,35 @@ def obtenerProductos():
     return jsonify(respuesta)
 
 
+@app.route('/alimento', methods=['POST'])
+def registrarAlimentos():
+    if db.child('alimentos').child(request.json.get('nombre')).get().val():
+        return jsonify({'mensaje': 'alimento ya fue registrado'}), 403
+    else:
+        data = {
+            "nombre": request.json.get('nombre'),
+            "grupo": request.json.get('grupo'),
+            "cantidad": request.json.get('cantidad'),
+            "aporte": request.json.get('aporte'),
+            "colegiado": request.json.get('colegiado'),
+            "profesional": request.json.get('profesional')
+        }
+
+        db.child('alimentos').child(
+            request.json.get('nombre')).set(data)
+
+        return jsonify({'mensaje': 'alimento agregado'})
+
+
+@app.route('/alimento')
+def obtenerAlimentos():
+    respuesta = []
+    todo = db.child('alimentos').get()
+    for t in todo.each():
+        respuesta.append(t.val())
+
+    return jsonify(respuesta)
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=7050, use_reloader=True)
