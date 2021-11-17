@@ -50,5 +50,34 @@ def inicioSesion():
         return jsonify({'mensaje': 'colegiado no ha sido registrado'}), 404
 
 
+@app.route('/producto', methods=['POST'])
+def registrarProductos():
+    if db.child('productos').child(request.json.get('nombre')).get().val():
+        return jsonify({'mensaje': 'producto ya fue registrado'}), 403
+    else:
+        data = {
+            "nombre": request.json.get('nombre'),
+            "clasificacion": request.json.get('clasificacion'),
+            "caracteristicas": request.json.get('caracteristicas'),
+            "colegiado": request.json.get('colegiado'),
+            "profesional": request.json.get('profesional')
+        }
+
+        db.child('productos').child(
+            request.json.get('nombre')).set(data)
+
+        return jsonify({'mensaje': 'producto agregado'})
+
+
+@app.route('/producto')
+def obtenerProductos():
+    respuesta = []
+    todo = db.child('productos').get()
+    for t in todo.each():
+        respuesta.append(t.val())
+
+    return jsonify(respuesta)
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=7050, use_reloader=True)
