@@ -111,7 +111,7 @@ class Login extends Component {
                     },
                   ]
                 );
-              } else {
+              } else if (response.status == 200) {
                 Alert.alert("Nuevo usuario", "Registro con éxito", [
                   {
                     text: "OK",
@@ -120,6 +120,15 @@ class Login extends Component {
                       this.enviarTexto();
                       flag = true;
                     },
+                  },
+                ]);
+              } else {
+                Alert.alert("Nuevo usuario", "Fallo creación. Intenta más tarde.", [
+                  {
+                    text: "OK",
+                    onPress: () => {
+                      this.enviarTexto();
+                     },
                   },
                 ]);
               }
