@@ -77,11 +77,18 @@ def registrarProductos():
 @app.route('/producto')
 def obtenerProductos():
     respuesta = []
-    todo = db.reference("productos").get()
+    todosProductos = []
+    referencia = db.reference("productos")
+    todo = referencia.get()
     for t in todo:
         respuesta.append(t)
 
-    return jsonify(respuesta)
+    for r in respuesta:
+        dictionary = {'nombre' : r}
+        dictionary.update(referencia.child(r).get())
+        todosProductos.append(dictionary)
+
+    return jsonify(todosProductos)
 
 
 @app.route('/alimento', methods=['POST'])
@@ -107,11 +114,18 @@ def registrarAlimentos():
 @app.route('/alimento')
 def obtenerAlimentos():
     respuesta = []
-    todo = db.reference()('alimentos').get()
-    for t in todo.each():
-        respuesta.append(t)
+    referencia = db.reference('alimentos')
+    todosAlimentos = []
+    todo = referencia.get()
+    for i in todo:
+        respuesta.append(i)
 
-    return jsonify(respuesta)
+    for r in respuesta:
+        dictionary = {'nombre' : r}
+        dictionary.update(referencia.child(r).get())
+        todosAlimentos.append(dictionary)
+
+    return jsonify(todosAlimentos)
 
 
 if __name__ == '__main__':

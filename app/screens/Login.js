@@ -13,6 +13,7 @@ import {
 
 import { Picker } from "@react-native-picker/picker";
 import * as Crypto from "expo-crypto";
+import SweetAlert from 'react-native-sweet-alert';
 
 var direcccion = require("../navigation/dir");
 
@@ -48,6 +49,17 @@ class Login extends Component {
   }
 
   alertaPositivo = () => {
+    SweetAlert.showAlertWithOptions({
+      title: 'P',
+      subTitle: 'SUB',
+      confirmButtonTitle: 'OK',
+      confirmButtonColor: '#000',
+      otherButtonTitle: 'Cancel',
+      otherButtonColor: '#dedede',
+      style: 'success',
+      cancellable: true
+    },
+      callback => console.log('callback'));
     Alert.alert("Ingreso sesión", "Bienvenido " + this.state.datos.nombre, [
       {
         text: "OK",
