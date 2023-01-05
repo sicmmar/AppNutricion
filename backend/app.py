@@ -1,13 +1,18 @@
-from config import configuracion
-import pyrebase
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+#import pyrebase
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from config import configuracion
 
 cfg = configuracion()
+cred = credentials.Certificate("cred.json")
 
-firebase = pyrebase.initialize_app(config=cfg.config)
+firebase_admin.initialize_app(cred, {
+    "databaseURL" : cfg.config
+})
 
-db = firebase.database()
 
 app = Flask(__name__)
 CORS(app)
@@ -20,7 +25,8 @@ def result():
 
 @app.route('/', methods=['POST'])
 def nuevoNutri():
-    if db.child('nutricionistas').child(request.json.get('colegiado')).get().val():
+    dataref = db.reference("nutricionistas")
+    if dataref.child(request.json.get('colegiado')).get():
         return jsonify({'mensaje': 'colegiado ya fue registrado'}), 403
     else:
         data = {
@@ -31,16 +37,15 @@ def nuevoNutri():
             "contrasena": request.json.get('contrasena')
         }
 
-        db.child('nutricionistas').child(
-            request.json.get('colegiado')).set(data)
+        dataref.child(request.json.get('colegiado')).set(data)
 
         return jsonify({'mensaje': 'nutricionista agregado'})
 
 
 @app.route('/', methods=['PUT'])
 def inicioSesion():
-    datos = db.child('nutricionistas').child(
-        request.json.get('colegiado')).get().val()
+    dataref = db.reference("nutricionistas")
+    datos = dataref.child(request.json.get('colegiado')).get()
     if datos:
         if datos['contrasena'] == request.json.get('contrasena'):
             return datos
@@ -52,7 +57,8 @@ def inicioSesion():
 
 @app.route('/producto', methods=['POST'])
 def registrarProductos():
-    if db.child('productos').child(request.json.get('nombre')).get().val():
+    dataref = db.reference("productos")
+    if dataref.child(request.json.get('nombre')).get():
         return jsonify({'mensaje': 'producto ya fue registrado'}), 403
     else:
         data = {
@@ -63,8 +69,7 @@ def registrarProductos():
             "profesional": request.json.get('profesional')
         }
 
-        db.child('productos').child(
-            request.json.get('nombre')).set(data)
+        dataref.child(request.json.get('nombre')).set(data)
 
         return jsonify({'mensaje': 'producto agregado'})
 
@@ -72,16 +77,24 @@ def registrarProductos():
 @app.route('/producto')
 def obtenerProductos():
     respuesta = []
-    todo = db.child('productos').get()
-    for t in todo.each():
-        respuesta.append(t.val())
+    todosProductos = []
+    referencia = db.reference("productos")
+    todo = referencia.get()
+    for t in todo:
+        respuesta.append(t)
 
-    return jsonify(respuesta)
+    for r in respuesta:
+        dictionary = {'nombre' : r}
+        dictionary.update(referencia.child(r).get())
+        todosProductos.append(dictionary)
+
+    return jsonify(todosProductos)
 
 
 @app.route('/alimento', methods=['POST'])
 def registrarAlimentos():
-    if db.child('alimentos').child(request.json.get('nombre')).get().val():
+    dataref = db.reference("alimentos")
+    if dataref.child(request.json.get('nombre')).get():
         return jsonify({'mensaje': 'alimento ya fue registrado'}), 403
     else:
         data = {
@@ -93,8 +106,7 @@ def registrarAlimentos():
             "profesional": request.json.get('profesional')
         }
 
-        db.child('alimentos').child(
-            request.json.get('nombre')).set(data)
+        dataref.child(request.json.get('nombre')).set(data)
 
         return jsonify({'mensaje': 'alimento agregado'})
 
@@ -102,11 +114,18 @@ def registrarAlimentos():
 @app.route('/alimento')
 def obtenerAlimentos():
     respuesta = []
-    todo = db.child('alimentos').get()
-    for t in todo.each():
-        respuesta.append(t.val())
+    referencia = db.reference('alimentos')
+    todosAlimentos = []
+    todo = referencia.get()
+    for i in todo:
+        respuesta.append(i)
 
-    return jsonify(respuesta)
+    for r in respuesta:
+        dictionary = {'nombre' : r}
+        dictionary.update(referencia.child(r).get())
+        todosAlimentos.append(dictionary)
+
+    return jsonify(todosAlimentos)
 
 
 if __name__ == '__main__':

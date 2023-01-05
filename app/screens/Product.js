@@ -17,6 +17,7 @@ import SectionedMultiSelect from "react-native-sectioned-multi-select";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Picker } from "@react-native-picker/picker";
 import CardFlip from "react-native-card-flip";
+
 const direcccion = require("../navigation/dir");
 
 const items = [
@@ -165,6 +166,7 @@ class Product extends Component {
           style={[styles.cardContainer, { flexWrap: "wrap" }]}
         >
           <TouchableOpacity
+            key="to{elemento.nombre}"
             activeOpacity={1}
             style={[
               styles.card,
@@ -176,12 +178,12 @@ class Product extends Component {
               },
             ]}
           >
-            <Text style={styles.label}>{elemento.nombre}</Text>
-            <Text>{elemento.clasificacion}</Text>
-            <Text>
+            <Text key={elemento.nombre} style={styles.label}>{elemento.nombre}</Text>
+            <Text key={elemento.clasificacion}>{elemento.clasificacion}</Text>
+            <Text key={elemento.colegiado}>
               Ingresado por: [{elemento.colegiado}] {elemento.profesional}
             </Text>
-            <View
+            <View key="v{elemento.nombre}"
               style={{
                 justifyContent: "space-evenly",
                 flexDirection: "row",
@@ -375,7 +377,7 @@ class Product extends Component {
                   this.state.datos == null ? "#a1a2a1" : "#6d9c81",
                 borderRadius: 100,
               }}
-              disabled={this.state.datos == null ? true : false}
+              visible = {this.state.datos == null ? false : true}
               onPress={() => this.displayModal(true)}
             >
               <Image
