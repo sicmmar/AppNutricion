@@ -127,6 +127,41 @@ def obtenerAlimentos():
 
     return jsonify(todosAlimentos)
 
+@app.route('/receta', methods=['POST'])
+def registrarReceta():
+    dataref = db.reference("recetas")
+    if dataref.child(request.json.get('nombre')).get():
+        return jsonify({'mensaje': 'receta ya fue registrada'}), 403
+    else:
+        data = {
+            "nombre": request.json.get('nombre'),
+            "ingredientes": request.json.get('ingredientes'),
+            "proceso": request.json.get('proceso'),
+            "colegiado": request.json.get('colegiado'),
+            "profesional": request.json.get('profesional')
+        }
+
+        dataref.child(request.json.get('nombre')).set(data)
+
+        return jsonify({'mensaje': 'receta agregado'})
+
+
+@app.route('/receta')
+def obtenerReceta():
+    respuesta = []
+    referencia = db.reference('recetas')
+    todosAlimentos = []
+    todo = referencia.get()
+    for i in todo:
+        respuesta.append(i)
+
+    for r in respuesta:
+        dictionary = {'nombre' : r}
+        dictionary.update(referencia.child(r).get())
+        todosAlimentos.append(dictionary)
+
+    return jsonify(todosAlimentos)
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=7050, use_reloader=True)

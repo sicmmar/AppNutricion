@@ -32,9 +32,9 @@ class Recipe extends Component {
       todosDatos: [],
       tododElementos: [],
       caract: [],
-      aporte: 0,
-      porcion: 0,
-      medidaPorcion: "unidad",
+      ingredientes: "",
+      procedimiento: "",
+      medidaprocedimiento: "unidad",
     };
   }
 
@@ -54,7 +54,7 @@ class Recipe extends Component {
     AsyncStorage.getItem("DATOS")
       .then((v) => {
         this.setState({ datos: JSON.parse(v), verBoton: true });
-        fetch("http://" + direcccion.ip + ":7050/alimento", {
+        fetch("http://" + direcccion.ip + ":7050/receta", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         })
@@ -77,9 +77,9 @@ class Recipe extends Component {
       selectedItems: [],
       nombreProd: "",
       clasificacion: "",
-      aporte: 0,
-      porcion: 0,
-      medidaPorcion: "unidad",
+      ingredientes: 0,
+      procedimiento: 0,
+      medidaprocedimiento: "unidad",
     });
   };
 
@@ -95,35 +95,52 @@ class Recipe extends Component {
             style={[
               styles.card,
               {
-                backgroundColor: "#4bb9d9",
+                backgroundColor: "#c098e5",
               },
             ]}
           >
             <Text style={styles.label}>{elemento.nombre}</Text>
-            <Text>{elemento.clasificacion}</Text>
-            <View
-              style={{
-                justifyContent: "space-evenly",
-                flexDirection: "row",
-                alignContent: "space-around",
-              }}
-            >
-              <View style={styles.text_tags}>
-                <Text
+                <View
                   style={{
-                    color: "#fdfdfd",
-                    flexShrink: 1,
-                    flexWrap: "wrap",
-                    textAlign: "center",
+                    justifyContent: "space-evenly",
+                    flexDirection: "row",
+                    alignContent: "space-around",
                   }}
                 >
-                  Aporta {elemento.aporte} por cada {elemento.cantidad}
-                </Text>
-              </View>
-            </View>
-            <Text>
-              Ingresado por: [{elemento.colegiado}] {elemento.profesional}
-            </Text>
+                  <View style={styles.text_tags}>
+                    <Text
+                      style={{
+                        color: "#fdfdfd",
+                        flexShrink: 1,
+                        flexWrap: "wrap",
+                        textAlign: "center",
+                      }}
+                    >
+                      {elemento.ingredientes.toString()}
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    justifyContent: "space-evenly",
+                    flexDirection: "row",
+                    alignContent: "space-around",
+                  }}
+                >
+                  <View style={styles.text_tags}>
+                    <Text
+                      style={{
+                        color: "#fdfdfd",
+                        flexShrink: 1,
+                        flexWrap: "wrap",
+                        textAlign: "center",
+                      }}
+                    >
+                      {elemento.proceso}
+                    </Text>
+                  </View>
+                </View>
+                <Text>Ingresado por: {'[' + elemento.colegiado + '] ' + elemento.profesional}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={1}
@@ -137,12 +154,10 @@ class Recipe extends Component {
   registrarAlimento = () => {
     if (
       this.state.nombreProd == "" ||
-      this.state.clasificacion == "" ||
-      this.state.clasificacion == "null" ||
-      this.state.aporte <= 0 ||
-      this.state.porcion <= 0
+      this.state.ingredientes == "" ||
+      this.state.procedimiento == ""
     ) {
-      Alert.alert("Registrar alimento", "Favor llena todos los campos", [
+      Alert.alert("Registrar receta", "Favor llena todos los campos", [
         {
           text: "OK",
           onPress: () => {
@@ -151,15 +166,13 @@ class Recipe extends Component {
         },
       ]);
     } else {
-      fetch("http://" + direcccion.ip + ":7050/alimento", {
+      fetch("http://" + direcccion.ip + ":7050/receta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: this.state.nombreProd,
-          grupo: this.state.clasificacion,
-          cantidad:
-            this.state.porcion.toString() + " " + this.state.medidaPorcion,
-          aporte: this.state.aporte.toString() + " " + this.state.clasificacion,
+          proceso: this.state.procedimiento.toString(),
+          ingredientes: this.state.ingredientes.toString() + " " + this.state.clasificacion,
           colegiado: this.state.datos.colegiado,
           profesional: this.state.datos.nombre,
         }),
@@ -167,13 +180,13 @@ class Recipe extends Component {
         .then((response) => {
           if (response.status == 403) {
             Alert.alert(
-              "Registrar alimento",
-              "El alimento ya tiene registro previo",
+              "Registrar receta",
+              "La receta ya tiene registro previo",
               [
                 {
                   text: "OK",
                   onPress: () => {
-                    console.log("alimento repetido");
+                    console.log("receta repetido");
                   },
                 },
               ]
@@ -185,7 +198,7 @@ class Recipe extends Component {
         .then((response) => {
           console.log(response);
           if (response != undefined) {
-            Alert.alert("Registrar alimento", "Alimento Registrado", [
+            Alert.alert("Registrar receta", "Receta Registrada", [
               {
                 text: "OK",
                 onPress: () => {
@@ -221,31 +234,7 @@ class Recipe extends Component {
               autoCorrect={false}
             />
 
-            <TouchableOpacity
-              style={{
-                borderColor: "#f19476",
-                borderRadius: 41,
-                borderWidth: 1.3,
-                margin: 15,
-                width: 321,
-                fontSize: 19,
-                textAlign: "center",
-                marginLeft: 15,
-              }}
-            >
-              <Picker
-                selectedValue={this.state.clasificacion}
-                onValueChange={(value, index) =>
-                  this.setState({ clasificacion: value })
-                }
-              >
-                <Picker.Item label="Grupo" value="null" />
-                <Picker.Item label="Caloría (kCal)" value="Caloría (kCal)" />
-                <Picker.Item label="Proteína (g)" value="Proteína (g)" />
-              </Picker>
-            </TouchableOpacity>
-
-            <Text>Aporte por porción</Text>
+            <Text>Ingredientes</Text>
             <View
               style={{
                 justifyContent: "space-evenly",
@@ -254,38 +243,16 @@ class Recipe extends Component {
               }}
             >
               <TextInput
-                style={[styles.inputModal, { width: 167 }]}
-                placeholder="Cant. Porción"
-                maxLength={7}
-                onChangeText={(value) => this.setState({ porcion: value })}
-                value={this.state.porcion}
-                keyboardType="numeric"
+                style={[styles.inputModal]}
+                placeholder="Ingredientes necesarios para preparar receta ..."
+                multiline
+                numberOfLines={4}
+                onChangeText={(value) => this.setState({ ingredientes: value })}
+                value={this.state.ingredientes}
+                keyboardType="text"
               />
-              <TouchableOpacity
-                style={{
-                  borderColor: "#f19476",
-                  borderRadius: 41,
-                  borderWidth: 1.3,
-                  margin: 15,
-                  width: 147,
-                  fontSize: 19,
-                  textAlign: "center",
-                  marginLeft: 15,
-                }}
-              >
-                <Picker
-                  selectedValue={this.state.medidaPorcion}
-                  onValueChange={(value, index) =>
-                    this.setState({ medidaPorcion: value })
-                  }
-                >
-                  <Picker.Item label="unidad" value="unidad" />
-                  <Picker.Item label="taza" value="taza" />
-                  <Picker.Item label="cucharada" value="cucharada" />
-                  <Picker.Item label="cucharadita" value="cucharadita" />
-                </Picker>
-              </TouchableOpacity>
             </View>
+            <Text>Preparación</Text>
             <View
               style={{
                 justifyContent: "space-evenly",
@@ -294,36 +261,14 @@ class Recipe extends Component {
               }}
             >
               <TextInput
-                style={[styles.inputModal, { width: 167 }]}
-                placeholder="Aporte p/porción"
-                maxLength={7}
-                onChangeText={(value) => this.setState({ aporte: value })}
-                value={this.state.aporte}
-                keyboardType="numeric"
+                style={[styles.inputModal]}
+                placeholder="Procedimiento necesario para receta ..."
+                multiline
+                numberOfLines={4}
+                onChangeText={(value) => this.setState({ procedimiento: value })}
+                value={this.state.procedimiento}
+                keyboardType="text"
               />
-              <TouchableOpacity
-                style={{
-                  borderColor: "#f19476",
-                  borderRadius: 41,
-                  borderWidth: 1.3,
-                  margin: 15,
-                  width: 147,
-                  fontSize: 19,
-                  textAlign: "center",
-                  marginLeft: 15,
-                }}
-              >
-                <Picker
-                  selectedValue={this.state.clasificacion}
-                  onValueChange={(value, index) =>
-                    this.setState({ clasificacion: value })
-                  }
-                >
-                  <Picker.Item label="Grupo" value="null" />
-                  <Picker.Item label="Caloría (kCal)" value="Caloría (kCal)" />
-                  <Picker.Item label="Proteína (g)" value="Proteína (g)" />
-                </Picker>
-              </TouchableOpacity>
             </View>
 
             <TouchableOpacity onPress={this.registrarAlimento}>
@@ -352,67 +297,9 @@ class Recipe extends Component {
           }
         >
           <ScrollView contentContainerStyle={{ padding: 25 }}>
-            <CardFlip style={[styles.cardContainer, { flexWrap: "wrap" }]}>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={[
-                  styles.card,
-                  {
-                    backgroundColor: "#c098e5",
-                  },
-                ]}
-              >
-                <Text style={styles.label}>Horneado Tomate</Text>
-                <View
-                  style={{
-                    justifyContent: "space-evenly",
-                    flexDirection: "row",
-                    alignContent: "space-around",
-                  }}
-                >
-                  <View style={styles.text_tags}>
-                    <Text
-                      style={{
-                        color: "#fdfdfd",
-                        flexShrink: 1,
-                        flexWrap: "wrap",
-                        textAlign: "center",
-                      }}
-                    >
-                      3 Tomate{"\n"} 1 Cucharada sal{"\n"} 1/2 Taza aceite
-                    </Text>
-                  </View>
-                </View>
-                <View
-                  style={{
-                    justifyContent: "space-evenly",
-                    flexDirection: "row",
-                    alignContent: "space-around",
-                  }}
-                >
-                  <View style={styles.text_tags}>
-                    <Text
-                      style={{
-                        color: "#fdfdfd",
-                        flexShrink: 1,
-                        flexWrap: "wrap",
-                        textAlign: "center",
-                      }}
-                    >
-                      Licuar Tomate{"\n"} Mezclar en un bowl{"\n"} Engrasar el
-                      molde {"\n"} Hornear a 37*C
-                    </Text>
-                  </View>
-                </View>
-                <Text>Ingresado por: [7051] Mariana Sic</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={[styles.card, styles.card2]}
-              ></TouchableOpacity>
-            </CardFlip>
+            {this.obtenerTodo()}
           </ScrollView>
-          {this.state.verBoton && (
+          {this.state.datos != null && (
             <TouchableOpacity
               style={{
                 alignItems: "center",

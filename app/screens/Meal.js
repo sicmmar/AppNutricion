@@ -354,7 +354,7 @@ class Meal extends Component {
           <ScrollView contentContainerStyle={{ padding: 25 }}>
             {this.obtenerTodo()}
           </ScrollView>
-          {this.state.verBoton && (
+          {this.state.datos != null && (
             <TouchableOpacity
               style={{
                 alignItems: "center",
