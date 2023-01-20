@@ -103,8 +103,6 @@ class Product extends Component {
 
   onSelectedItemsChange = (selectedItems) => {
     this.setState({ selectedItems: selectedItems });
-
-    console.log(this.state.selectedItems);
   };
 
   _onRefresh = () => {
@@ -203,7 +201,6 @@ class Product extends Component {
   };
 
   registrarProducto = () => {
-    console.log("------------");
     var arr_aux = [];
     this.state.selectedItems.forEach((e) => {
       arr_aux.push(items[0].children[e]);
@@ -271,6 +268,37 @@ class Product extends Component {
         });
     }
   };
+
+  mostrarBoton() {
+    if (this.state.datos != null) {
+      return (
+        <TouchableOpacity
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            width: 60,
+            position: "absolute",
+            bottom: 20,
+            height: 60,
+            backgroundColor:
+              this.state.datos == null ? "#a1a2a1" : "#6d9c81",
+            borderRadius: 100,
+          }}
+          visible = {this.state.datos == null ? false : true}
+          onPress={() => this.displayModal(true)}
+        >
+          <Image
+            source={require("../assets/icons/plus.png")}
+            style={{
+              width: 25,
+              height: 25,
+              tintColor: "white",
+            }}
+          />
+        </TouchableOpacity>
+      ) 
+    }
+  }
 
   render() {
     return (
@@ -364,32 +392,7 @@ class Product extends Component {
           <ScrollView contentContainerStyle={{ padding: 25 }}>
             {this.obtenerTodo()}
           </ScrollView>
-          {this.state.verBoton && (
-            <TouchableOpacity
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                width: 60,
-                position: "absolute",
-                bottom: 20,
-                height: 60,
-                backgroundColor:
-                  this.state.datos == null ? "#a1a2a1" : "#6d9c81",
-                borderRadius: 100,
-              }}
-              visible = {this.state.datos == null ? false : true}
-              onPress={() => this.displayModal(true)}
-            >
-              <Image
-                source={require("../assets/icons/plus.png")}
-                style={{
-                  width: 25,
-                  height: 25,
-                  tintColor: "white",
-                }}
-              />
-            </TouchableOpacity>
-          )}
+          { this.mostrarBoton() }
         </ScrollView>
       </View>
     );

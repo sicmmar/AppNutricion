@@ -86,7 +86,7 @@ class Login extends Component {
         {
           text: "OK",
           onPress: () => {
-            console.log("campos vacioes en registro");
+            console.log("campos vacios en registro");
           },
         },
       ]);
@@ -433,7 +433,7 @@ class Login extends Component {
           <TouchableOpacity
             onPress={() => {
               AsyncStorage.clear();
-              this.setState({ datos: undefined });
+              this.setState({ datos: undefined, colegiado : undefined, pass : undefined });
             }}
           >
             <View style={styles.btn_icon}>
