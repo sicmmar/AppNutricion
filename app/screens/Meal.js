@@ -200,6 +200,18 @@ class Meal extends Component {
   };
 
   render() {
+    fetch("http://" + direcccion.ip + ":7050/alimento", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((respuesta) => {
+            return respuesta.json();
+          })
+          .then((respuesta) => {
+            if (respuesta != null) {
+              this.setState({ todosDatos: respuesta });
+            }
+          });
     return (
       <View style={styles.container}>
         <Modal
@@ -209,7 +221,7 @@ class Meal extends Component {
         >
           <View style={styles.containerModal}>
             <Image
-              source={require("../assets/icons/meal.jpg")}
+              source={require("../assets/icons/watermelon.jpg")}
               style={styles.image}
             />
 

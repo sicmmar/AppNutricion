@@ -301,6 +301,18 @@ class Product extends Component {
   }
 
   render() {
+    fetch("http://" + direcccion.ip + ":7050/producto", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((respuesta) => {
+            return respuesta.json();
+          })
+          .then((respuesta) => {
+            if (respuesta != null) {
+              this.setState({ todosDatos: respuesta });
+            }
+          });
     return (
       <View style={styles.container}>
         <Modal
