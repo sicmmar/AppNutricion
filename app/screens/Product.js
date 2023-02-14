@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  AsyncStorage,
   ScrollView,
   RefreshControl,
   TouchableOpacity,
@@ -17,6 +16,8 @@ import SectionedMultiSelect from "react-native-sectioned-multi-select";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Picker } from "@react-native-picker/picker";
 import CardFlip from "react-native-card-flip";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
 
 const direcccion = require("../navigation/dir");
 
@@ -105,30 +106,6 @@ class Product extends Component {
     this.setState({ selectedItems: selectedItems });
   };
 
-  _onRefresh = () => {
-    console.log("refrescazo");
-    this.setState({ refreshing: true, verBoton: false });
-    AsyncStorage.getItem("DATOS")
-      .then((v) => {
-        this.setState({ datos: JSON.parse(v), verBoton: true });
-        fetch("http://" + direcccion.ip + ":7050/producto", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        })
-          .then((respuesta) => {
-            return respuesta.json();
-          })
-          .then((respuesta) => {
-            if (respuesta != null) {
-              this.setState({ todosDatos: respuesta });
-            }
-          });
-      })
-      .then(() => {
-        this.setState({ refreshing: false });
-      });
-  };
-
   limpiarVar = () => {
     this.setState({
       selectedItems: [],
@@ -140,8 +117,9 @@ class Product extends Component {
   obtenerCarac = (lista) => {
     return lista.map((elemento) => {
       return (
-        <View style={styles.text_tags}>
+        <View key={'v' + elemento.name + 's'} style={styles.text_tags}>
           <Text
+            key={'txt' + elemento.name + 's'} 
             style={{
               color: "#fdfdfd",
               flexShrink: 1,
@@ -164,7 +142,7 @@ class Product extends Component {
           style={[styles.cardContainer, { flexWrap: "wrap" }]}
         >
           <TouchableOpacity
-            key="to{elemento.nombre}"
+            key={'to' + elemento.nombre}
             activeOpacity={1}
             style={[
               styles.card,
@@ -176,12 +154,12 @@ class Product extends Component {
               },
             ]}
           >
-            <Text key={elemento.nombre} style={styles.label}>{elemento.nombre}</Text>
+            <Text key={'txt' + elemento.nombre} style={styles.label}>{elemento.nombre}</Text>
             <Text key={elemento.clasificacion}>{elemento.clasificacion}</Text>
             <Text key={elemento.colegiado}>
               Ingresado por: [{elemento.colegiado}] {elemento.profesional}
             </Text>
-            <View key="v{elemento.nombre}"
+            <View key={'v' + elemento.nombre}
               style={{
                 justifyContent: "space-evenly",
                 flexDirection: "row",
@@ -269,8 +247,8 @@ class Product extends Component {
     }
   };
 
-  mostrarBoton() {
-    if (this.state.datos != null) {
+  mostrarBoton(mostrarse) {
+    if (mostrarse) {
       return (
         <TouchableOpacity
           style={{
@@ -301,20 +279,45 @@ class Product extends Component {
   }
 
   render() {
-    fetch("http://" + direcccion.ip + ":7050/producto", {
+    let boton = false;
+    const { isFocused } = this.props;
+    if (isFocused)
+    {
+      fetch("http://" + direcccion.ip + ":7050/producto", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         })
           .then((respuesta) => {
             return respuesta.json();
           })
-          .then((respuesta) => {
+          .then( async (respuesta) => {
             if (respuesta != null) {
+              const value = await AsyncStorage.getItem('DATOS');
+              try
+              {
+                if (value != null)
+                {
+                  this.setState({ datos: JSON.parse(value) });
+                  boton = true;
+                }
+                else 
+                {
+                  this.setState({ datos: null });
+                }
+              }
+              catch(error)
+              {
+                this.setState({ datos: null });
+                boton = false;
+              }
               this.setState({ todosDatos: respuesta });
             }
           });
+    }
+    
     return (
       <View style={styles.container}>
+        
         <Modal
           animationType={"slide"}
           transparent={false}
@@ -398,14 +401,18 @@ class Product extends Component {
           <ScrollView contentContainerStyle={{ padding: 25 }}>
             {this.obtenerTodo()}
           </ScrollView>
-          { this.mostrarBoton() }
+          { this.mostrarBoton(this.state.datos != null) }
         </ScrollView>
       </View>
     );
   }
 }
 
-export default Product;
+export default function(props) {
+  const isFocused = useIsFocused();
+
+  return <Product {...props} isFocused={isFocused} />;
+}
 
 const styles = StyleSheet.create({
   container: {
