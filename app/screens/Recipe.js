@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  AsyncStorage,
   ScrollView,
   RefreshControl,
   TouchableOpacity,
@@ -14,7 +13,11 @@ import {
 } from "react-native";
 
 import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CardFlip from "react-native-card-flip";
+
+import { useIsFocused } from '@react-navigation/native';
+
 const direcccion = require("../navigation/dir");
 
 class Recipe extends Component {
@@ -213,18 +216,43 @@ class Recipe extends Component {
   };
 
   render() {
-    fetch("http://" + direcccion.ip + ":7050/receta", {
+    let boton = false;
+    const { isFocused } = this.props;
+    if (isFocused)
+    {
+
+      fetch("http://" + direcccion.ip + ":7050/receta", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         })
           .then((respuesta) => {
             return respuesta.json();
           })
-          .then((respuesta) => {
+          .then( async (respuesta) => {
             if (respuesta != null) {
+              const value = await AsyncStorage.getItem('DATOS');
+              try
+              {
+                if (value != null)
+                {
+                  this.setState({ datos: JSON.parse(value) });
+                  boton = true;
+                }
+                else 
+                {
+                  this.setState({ datos: null });
+                }
+              }
+              catch(error)
+              {
+                this.setState({ datos: null });
+                boton = false;
+              }
               this.setState({ todosDatos: respuesta });
             }
           });
+    }
+    
     return (
       <View style={styles.container}>
         <Modal
@@ -337,7 +365,11 @@ class Recipe extends Component {
   }
 }
 
-export default Recipe;
+export default function(props) {
+  const isFocused = useIsFocused();
+
+  return <Recipe {...props} isFocused={isFocused} />;
+}
 
 const styles = StyleSheet.create({
   container: {

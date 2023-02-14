@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   View,
   Modal,
-  AsyncStorage,
   Linking
 } from "react-native";
 
 import Checkbox from 'expo-checkbox';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from "@react-native-picker/picker";
 import * as Crypto from "expo-crypto";
 import SweetAlert from 'react-native-sweet-alert';
@@ -52,18 +52,7 @@ class Login extends Component {
   }
 
   alertaPositivo = () => {
-    SweetAlert.showAlertWithOptions({
-      title: 'P',
-      subTitle: 'SUB',
-      confirmButtonTitle: 'OK',
-      confirmButtonColor: '#000',
-      otherButtonTitle: 'Cancel',
-      otherButtonColor: '#dedede',
-      style: 'success',
-      cancellable: true
-    },
-      callback => console.log('callback'));
-    Alert.alert("Ingreso sesión", "Bienvenido " + this.state.datos.nombre, [
+    Alert.alert("Ingreso sesión", "Bienvenido " + this.state.nombre, [
       {
         text: "OK",
         onPress: () => {
@@ -197,14 +186,14 @@ class Login extends Component {
         Crypto.CryptoDigestAlgorithm.SHA384,
         this.state.pass
       ).then((valor) => {
-        this.setState({ pass: valor });
+        const b = JSON.stringify({
+          colegiado: this.state.colegiado,
+          contrasena: valor,
+        });
         fetch("http://" + direcccion.ip + ":7050/", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            colegiado: this.state.colegiado,
-            contrasena: this.state.pass,
-          }),
+          body: b,
         })
           .then((response) => {
             if (response.status == 403) {
@@ -232,16 +221,14 @@ class Login extends Component {
                 },
               ]);
             } else {
-              console.log("welcome");
               return response.json();
             }
           })
-          .then((response) => {
-            console.log(response);
+          .then(async (response) => {
             if (response != undefined) {
               this.setState({ datos: response });
-              AsyncStorage.setItem("DATOS", JSON.stringify(this.state.datos));
-              this.alertaPositivo();
+              await AsyncStorage.setItem('DATOS', JSON.stringify(response));
+              await this.alertaPositivo();
             }
           })
           .catch((err) => {
@@ -464,6 +451,7 @@ class Login extends Component {
           />
           <TouchableOpacity
             onPress={() => {
+              AsyncStorage.removeItem('DATOS')
               AsyncStorage.clear();
               this.setState({ datos: undefined, colegiado : undefined, pass : undefined });
             }}

@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  AsyncStorage,
   ScrollView,
   RefreshControl,
   TouchableOpacity,
@@ -14,10 +13,22 @@ import {
 } from "react-native";
 
 import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CardFlip from "react-native-card-flip";
+import { useIsFocused } from '@react-navigation/native';
+
 const direcccion = require("../navigation/dir");
 
 class Meal extends Component {
+  static navigationOptions = () => {
+    return {
+      tabBarOnPress({ navigation, defaultHandler }) {
+        navigation.state.params.onTabFocus();
+        defaultHandler();
+      }
+    };
+  };
+
   constructor(props) {
     super(props);
 
@@ -200,18 +211,42 @@ class Meal extends Component {
   };
 
   render() {
-    fetch("http://" + direcccion.ip + ":7050/alimento", {
+    let boton = false;
+    const { isFocused } = this.props;
+    if (isFocused)
+    {
+      fetch("http://" + direcccion.ip + ":7050/alimento", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         })
           .then((respuesta) => {
             return respuesta.json();
           })
-          .then((respuesta) => {
+          .then( async (respuesta) => {
             if (respuesta != null) {
+              const value = await AsyncStorage.getItem('DATOS');
+              try
+              {
+                if (value != null)
+                {
+                  this.setState({ datos: JSON.parse(value) });
+                  boton = true;
+                }
+                else 
+                {
+                  this.setState({ datos: null });
+                }
+              }
+              catch(error)
+              {
+                this.setState({ datos: null });
+                boton = false;
+              }
               this.setState({ todosDatos: respuesta });
             }
           });
+    }
+    
     return (
       <View style={styles.container}>
         <Modal
@@ -373,7 +408,6 @@ class Meal extends Component {
                   this.state.datos == null ? "#a1a2a1" : "#6d9c81",
                 borderRadius: 100,
               }}
-              disabled={this.state.datos == null ? true : false}
               onPress={() => this.displayModal(true)}
             >
               <Image
@@ -392,7 +426,11 @@ class Meal extends Component {
   }
 }
 
-export default Meal;
+export default function(props) {
+  const isFocused = useIsFocused();
+
+  return <Meal {...props} isFocused={isFocused} />;
+}
 
 const styles = StyleSheet.create({
   container: {
