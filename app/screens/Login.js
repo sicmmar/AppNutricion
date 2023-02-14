@@ -9,8 +9,10 @@ import {
   View,
   Modal,
   AsyncStorage,
+  Linking
 } from "react-native";
 
+import Checkbox from 'expo-checkbox';
 import { Picker } from "@react-native-picker/picker";
 import * as Crypto from "expo-crypto";
 import SweetAlert from 'react-native-sweet-alert';
@@ -29,6 +31,7 @@ class Login extends Component {
       universidad: "",
       nombre: "",
       edad: "",
+      privacy : false
     };
   }
 
@@ -90,7 +93,20 @@ class Login extends Component {
           },
         },
       ]);
-    } else {
+    }
+    
+    if (!this.state.privacy)
+    {
+      Alert.alert("Nuevo Registro", "Debe aceptar las políticas de privacidad", [
+        {
+          text: "OK",
+          onPress: () => {
+            console.log("campos vacios en registro");
+          },
+        },
+      ]);
+    }
+    else {
       if (this.state.pass2 == this.state.pass) {
         var flag = false;
         Crypto.digestStringAsync(
@@ -341,7 +357,23 @@ class Login extends Component {
                 onChangeText={(value) => this.setState({ pass2: value })}
                 value={this.state.pass2}
               />
-
+              <View style={styles.checkboxContainer}>
+                <Checkbox
+                  value={this.state.privacy}
+                  onValueChange={(value) => this.setState({ privacy: value })}
+                  style={styles.checkbox}
+                  color={this.state.privacy ? '#FFC300' : undefined}
+                />
+                <Text style={styles.label}>He leído y acepto las{' '}
+                <Text
+                  style={styles.hyperlinkStyle}
+                  onPress={() => {
+                    Linking.openURL('https://github.com/sicmmar/AppNutricion/blob/main/PrivacyPolicies.md');
+                  }}>
+                  Políticas de Privacidad
+                </Text>
+                </Text>
+              </View>
               <TouchableOpacity onPress={this.registrar}>
                 <View style={styles.botonesSec}>
                   <Text style={styles.txtBoton}>Registrar</Text>
@@ -531,5 +563,18 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     height: 200,
     width: "100%",
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  checkbox: {
+    alignSelf: 'center',
+  },
+  label: {
+    margin: 8,
+  },
+  hyperlinkStyle: {
+    color: 'blue',
   },
 });

@@ -301,12 +301,6 @@ class Recipe extends Component {
         </Modal>
         <ScrollView
           contentContainerStyle={styles.container}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh}
-            />
-          }
         >
           <ScrollView contentContainerStyle={{ padding: 25 }}>
             {this.obtenerTodo()}
